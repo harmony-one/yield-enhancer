@@ -26,6 +26,9 @@ export function useYieldBoost() {
     token: appConfig.sDaiTokenAddress as `0x${string}`,
     address: userAddress,
     chainId: harmonyOne.id,
+    query: {
+      refetchInterval: 1000
+    }
   })
 
   const calculatePreview = useCallback((inputAmount: string, mode: 'deposit' | 'withdraw') => {
@@ -50,7 +53,6 @@ export function useYieldBoost() {
 
   const handleBoostYield = async () => {
     try {
-
       const amountParsed = parseUnits(amount.toString(), 18)
 
       const approveHash = await writeContractAsync({
@@ -77,11 +79,32 @@ export function useYieldBoost() {
       });
       setAmount('')
     } catch (e) {
-      console.error('Failed to boost:', e);
+      console.error('Failed to deposit:', e);
     }
   }
 
-  // const OldhandleBoostYield = useCallback(() => {
+  const handleWithdraw = async () => {
+    try {
+      const amountParsed = parseUnits(amount.toString(), 18)
+      const withdrawHash = await writeContractAsync({
+        abi: StakingVaultABI,
+        address: appConfig.stakingVaultAddress as `0x${string}`,
+        functionName: 'withdraw',
+        args: [amountParsed, userAddress, userAddress],
+      })
+      console.log('Withdraw txnHash:', withdrawHash)
+      await waitForTransactionReceipt(wagmiConfig, { hash: withdrawHash })
+      toast({
+        title: "Withdrawal Successful",
+        description: `${amount} 1sDAI has been returned to your available balance.`,
+      });
+      setAmount("");
+    } catch(e) {
+      console.error('Failed to withdraw:', e);
+    }
+  }
+
+  // const handleBoostYield = useCallback(() => {
   //   const depositAmount = parseFloat(amount);
   //   if (!isNaN(depositAmount) && depositAmount <= availableBalance) {
   //     const withFee = depositAmount * (1 - DEPOSIT_FEE);
@@ -102,26 +125,26 @@ export function useYieldBoost() {
   //   }
   // }, [amount, availableBalance, toast]);
 
-  const handleWithdraw = useCallback(() => {
-    const withdrawAmount = parseFloat(amount);
-    if (!isNaN(withdrawAmount) && boostedAmount !== null && withdrawAmount <= boostedAmount) {
-      const baseAmount = withdrawAmount * EXCHANGE_RATE;
-      const withFee = baseAmount * (1 - WITHDRAWAL_FEE);
-      setBoostedAmount((prev) => (prev || 0) - withdrawAmount);
-      // setAvailableBalance((prev) => prev + withFee);
-      toast({
-        title: "Withdrawal Successful",
-        description: `${formatToken(withFee, '1sDAI')} has been returned to your available balance.`,
-      });
-      setAmount("");
-    } else {
-      toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid amount within your boosted balance.",
-        variant: "destructive",
-      });
-    }
-  }, [amount, boostedAmount, toast]);
+  // const handleWithdraw = useCallback(() => {
+  //   const withdrawAmount = parseFloat(amount);
+  //   if (!isNaN(withdrawAmount) && boostedAmount !== null && withdrawAmount <= boostedAmount) {
+  //     const baseAmount = withdrawAmount * EXCHANGE_RATE;
+  //     const withFee = baseAmount * (1 - WITHDRAWAL_FEE);
+  //     setBoostedAmount((prev) => (prev || 0) - withdrawAmount);
+  //     // setAvailableBalance((prev) => prev + withFee);
+  //     toast({
+  //       title: "Withdrawal Successful",
+  //       description: `${formatToken(withFee, '1sDAI')} has been returned to your available balance.`,
+  //     });
+  //     setAmount("");
+  //   } else {
+  //     toast({
+  //       title: "Invalid Amount",
+  //       description: "Please enter a valid amount within your boosted balance.",
+  //       variant: "destructive",
+  //     });
+  //   }
+  // }, [amount, boostedAmount, toast]);
 
   const availableBalance = (tokenBalance ? +tokenBalance?.formatted : 0)
 
