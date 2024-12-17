@@ -1,5 +1,6 @@
 import { WalletButton } from './WalletButton';
 import { Logo } from './Logo';
+import {ConnectKitButton} from "connectkit";
 
 export function Header() {
   return (
@@ -9,7 +10,8 @@ export function Header() {
           <Logo />
           <span className="text-xl font-semibold">Yield Boost</span>
         </div>
-        <WalletButton />
+        <ConnectKitButton />
+        {/*<WalletButton />*/}
       </div>
     </div>
   );
