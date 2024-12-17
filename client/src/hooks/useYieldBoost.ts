@@ -1,26 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
-import { useWallet } from './use-wallet';
-import { EXCHANGE_RATE, DEPOSIT_FEE, WITHDRAWAL_FEE } from '@/lib/constants';
-import { formatToken } from '@/lib/format';
 import {useAccount, useBalance, useWriteContract} from "wagmi";
+import {readContract} from "@wagmi/core";
 import StakingVaultABI from "../abi/StakingVault.json";
 import TokenABI from "../abi/Token.json";
 import {appConfig} from "@/config.ts";
-import {parseUnits} from "viem";
+import {formatUnits, parseUnits} from "viem";
 import {waitForTransactionReceipt} from "wagmi/actions";
 import {wagmiConfig} from "@/providers/Web3Provider.tsx";
 import {harmonyOne} from "wagmi/chains";
+import useDebounce from "@/hooks/useDebounce.ts";
 
 export function useYieldBoost() {
-  const { isConnected } = useWallet();
   const [amount, setAmount] = useState("");
-  const [boostedAmount, setBoostedAmount] = useState<number | null>(null);
   const [previewAmount, setPreviewAmount] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'deposit' | 'withdraw'>('deposit');
   const { toast } = useToast();
   const { writeContractAsync } = useWriteContract()
-  const { address: userAddress } = useAccount()
+  const { address: userAddress, isConnected } = useAccount()
+  const debouncedAmount = useDebounce(amount)
 
   const { data: tokenBalance } = useBalance({
     token: appConfig.sDaiTokenAddress as `0x${string}`,
@@ -31,25 +29,37 @@ export function useYieldBoost() {
     }
   })
 
-  const calculatePreview = useCallback((inputAmount: string, mode: 'deposit' | 'withdraw') => {
-    const parsed = parseFloat(inputAmount);
-    if (!isNaN(parsed)) {
-      if (mode === 'deposit') {
-        // Converting 1sDAI to boostDAI
-        const withFee = parsed * (1 - DEPOSIT_FEE);
-        return withFee / EXCHANGE_RATE;
-      } else {
-        // Converting boostDAI to 1sDAI
-        const baseAmount = parsed * EXCHANGE_RATE;
-        return baseAmount * (1 - WITHDRAWAL_FEE);
-      }
+  const { data: sharesBalance } = useBalance({
+    token: appConfig.stakingVaultAddress as `0x${string}`,
+    address: userAddress,
+    chainId: harmonyOne.id,
+    query: {
+      refetchInterval: 1000
     }
-    return null;
-  }, []);
+  })
 
   useEffect(() => {
-    setPreviewAmount(calculatePreview(amount, activeTab));
-  }, [amount, calculatePreview, activeTab]);
+    const updatePreviewAmount = async () => {
+      try {
+        const amountParsed = parseUnits(debouncedAmount.toString(), 18)
+        const estimateValue = await readContract(wagmiConfig, {
+          abi: StakingVaultABI,
+          address: appConfig.stakingVaultAddress as `0x${string}`,
+          functionName: activeTab === 'deposit' ? 'previewDeposit' : 'previewWithdraw',
+          args: [amountParsed]
+        }) as bigint
+        const estimateValueNumber = formatUnits(estimateValue, 18)
+        setPreviewAmount(Number(estimateValueNumber))
+      } catch (e) {
+        console.error('Failed to get preview amount', e);
+      }
+    }
+    if(debouncedAmount && debouncedAmount !== '0') {
+      updatePreviewAmount()
+    } else {
+      setPreviewAmount(null)
+    }
+  }, [debouncedAmount, activeTab]);
 
   const handleBoostYield = async () => {
     try {
@@ -86,6 +96,7 @@ export function useYieldBoost() {
   const handleWithdraw = async () => {
     try {
       const amountParsed = parseUnits(amount.toString(), 18)
+      console.log('amountParsed', amountParsed)
       const withdrawHash = await writeContractAsync({
         abi: StakingVaultABI,
         address: appConfig.stakingVaultAddress as `0x${string}`,
@@ -147,6 +158,7 @@ export function useYieldBoost() {
   // }, [amount, boostedAmount, toast]);
 
   const availableBalance = (tokenBalance ? +tokenBalance?.formatted : 0)
+  const boostedAmount = (sharesBalance ? +sharesBalance?.formatted : 0)
 
   return {
     isConnected,

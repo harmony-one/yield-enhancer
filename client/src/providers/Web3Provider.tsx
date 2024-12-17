@@ -2,6 +2,7 @@ import { WagmiProvider, createConfig, http } from "wagmi";
 import { harmonyOne } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
+import {ReactNode} from "react";
 
 export const wagmiConfig = createConfig(
   getDefaultConfig({
@@ -10,7 +11,7 @@ export const wagmiConfig = createConfig(
       [harmonyOne.id]: http(),
     },
 
-    walletConnectProjectId: '123',
+    walletConnectProjectId: '2c58d7bfbc1b22c38a304d39f6b72781',
     appName: "Yield Enhancer",
 
     // Optional App Info
@@ -22,7 +23,11 @@ export const wagmiConfig = createConfig(
 
 const queryClient = new QueryClient();
 
-export const Web3Provider = ({ children }) => {
+interface Props {
+  children?: ReactNode
+}
+
+export const Web3Provider = ({ children }: Props) => {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
