@@ -3,6 +3,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { useWallet } from './use-wallet';
 import { EXCHANGE_RATE, DEPOSIT_FEE, WITHDRAWAL_FEE } from '@/lib/constants';
 import { formatToken } from '@/lib/format';
+import {useAccount, useWriteContract} from "wagmi";
+import StakingVaultABI from "../abi/StakingVault.json";
+import TokenABI from "../abi/Token.json";
+import {appConfig} from "@/config.ts";
+import {parseUnits} from "viem";
+import {waitForTransactionReceipt} from "wagmi/actions";
+import {wagmiConfig} from "@/providers/Web3Provider.tsx";
 
 export function useYieldBoost() {
   const { isConnected } = useWallet();
@@ -12,6 +19,8 @@ export function useYieldBoost() {
   const [previewAmount, setPreviewAmount] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'deposit' | 'withdraw'>('deposit');
   const { toast } = useToast();
+  const { writeContractAsync } = useWriteContract()
+  const { address: userAddress } = useAccount()
 
   const calculatePreview = useCallback((inputAmount: string, mode: 'deposit' | 'withdraw') => {
     const parsed = parseFloat(inputAmount);
@@ -33,7 +42,40 @@ export function useYieldBoost() {
     setPreviewAmount(calculatePreview(amount, activeTab));
   }, [amount, calculatePreview, activeTab]);
 
-  const handleBoostYield = useCallback(() => {
+  const handleBoostYield = async () => {
+    try {
+
+      const amountParsed = parseUnits(amount.toString(), 18)
+
+      const approveHash = await writeContractAsync({
+        abi: TokenABI as never,
+        address: appConfig.sDaiTokenAddress as `0x${string}`,
+        functionName: 'approve',
+        args: [appConfig.stakingVaultAddress, amountParsed],
+      })
+
+      console.log('approveHash', approveHash)
+      await waitForTransactionReceipt(wagmiConfig, { hash: approveHash })
+
+      const depositHash = await writeContractAsync({
+        abi: StakingVaultABI,
+        address: appConfig.stakingVaultAddress as `0x${string}`,
+        functionName: 'deposit',
+        args: [amountParsed, userAddress],
+      })
+      console.log('Deposit txnHash:', depositHash)
+      await waitForTransactionReceipt(wagmiConfig, { hash: depositHash })
+      toast({
+        title: "Yield Boosted",
+        description: `${amount} 1sDAI is now earning boosted yield.`,
+      });
+      setAmount('')
+    } catch (e) {
+      console.error('Failed to boost:', e);
+    }
+  }
+
+  const OldhandleBoostYield = useCallback(() => {
     const depositAmount = parseFloat(amount);
     if (!isNaN(depositAmount) && depositAmount <= availableBalance) {
       const withFee = depositAmount * (1 - DEPOSIT_FEE);
