@@ -3,24 +3,30 @@ import { useToast } from "@/components/ui/use-toast";
 import { useWallet } from './use-wallet';
 import { EXCHANGE_RATE, DEPOSIT_FEE, WITHDRAWAL_FEE } from '@/lib/constants';
 import { formatToken } from '@/lib/format';
-import {useAccount, useWriteContract} from "wagmi";
+import {useAccount, useBalance, useWriteContract} from "wagmi";
 import StakingVaultABI from "../abi/StakingVault.json";
 import TokenABI from "../abi/Token.json";
 import {appConfig} from "@/config.ts";
 import {parseUnits} from "viem";
 import {waitForTransactionReceipt} from "wagmi/actions";
 import {wagmiConfig} from "@/providers/Web3Provider.tsx";
+import {harmonyOne} from "wagmi/chains";
 
 export function useYieldBoost() {
   const { isConnected } = useWallet();
   const [amount, setAmount] = useState("");
-  const [availableBalance, setAvailableBalance] = useState(28394.48);
   const [boostedAmount, setBoostedAmount] = useState<number | null>(null);
   const [previewAmount, setPreviewAmount] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'deposit' | 'withdraw'>('deposit');
   const { toast } = useToast();
   const { writeContractAsync } = useWriteContract()
   const { address: userAddress } = useAccount()
+
+  const { data: tokenBalance } = useBalance({
+    token: appConfig.sDaiTokenAddress as `0x${string}`,
+    address: userAddress,
+    chainId: harmonyOne.id,
+  })
 
   const calculatePreview = useCallback((inputAmount: string, mode: 'deposit' | 'withdraw') => {
     const parsed = parseFloat(inputAmount);
@@ -75,26 +81,26 @@ export function useYieldBoost() {
     }
   }
 
-  const OldhandleBoostYield = useCallback(() => {
-    const depositAmount = parseFloat(amount);
-    if (!isNaN(depositAmount) && depositAmount <= availableBalance) {
-      const withFee = depositAmount * (1 - DEPOSIT_FEE);
-      const boostedValue = withFee / EXCHANGE_RATE;
-      setBoostedAmount((prev) => (prev || 0) + boostedValue);
-      setAvailableBalance((prev) => prev - depositAmount);
-      toast({
-        title: "Yield Boosted",
-        description: `${formatToken(boostedValue, 'boostDAI')} is now earning boosted yield.`,
-      });
-      setAmount("");
-    } else {
-      toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid amount within your available balance.",
-        variant: "destructive",
-      });
-    }
-  }, [amount, availableBalance, toast]);
+  // const OldhandleBoostYield = useCallback(() => {
+  //   const depositAmount = parseFloat(amount);
+  //   if (!isNaN(depositAmount) && depositAmount <= availableBalance) {
+  //     const withFee = depositAmount * (1 - DEPOSIT_FEE);
+  //     const boostedValue = withFee / EXCHANGE_RATE;
+  //     setBoostedAmount((prev) => (prev || 0) + boostedValue);
+  //     setAvailableBalance((prev) => prev - depositAmount);
+  //     toast({
+  //       title: "Yield Boosted",
+  //       description: `${formatToken(boostedValue, 'boostDAI')} is now earning boosted yield.`,
+  //     });
+  //     setAmount("");
+  //   } else {
+  //     toast({
+  //       title: "Invalid Amount",
+  //       description: "Please enter a valid amount within your available balance.",
+  //       variant: "destructive",
+  //     });
+  //   }
+  // }, [amount, availableBalance, toast]);
 
   const handleWithdraw = useCallback(() => {
     const withdrawAmount = parseFloat(amount);
@@ -102,7 +108,7 @@ export function useYieldBoost() {
       const baseAmount = withdrawAmount * EXCHANGE_RATE;
       const withFee = baseAmount * (1 - WITHDRAWAL_FEE);
       setBoostedAmount((prev) => (prev || 0) - withdrawAmount);
-      setAvailableBalance((prev) => prev + withFee);
+      // setAvailableBalance((prev) => prev + withFee);
       toast({
         title: "Withdrawal Successful",
         description: `${formatToken(withFee, '1sDAI')} has been returned to your available balance.`,
@@ -116,6 +122,8 @@ export function useYieldBoost() {
       });
     }
   }, [amount, boostedAmount, toast]);
+
+  const availableBalance = (tokenBalance ? +tokenBalance?.formatted : 0)
 
   return {
     isConnected,
