@@ -68,15 +68,24 @@ export function useYieldBoost() {
     try {
       const amountParsed = parseUnits(amount.toString(), 18)
 
-      const approveHash = await writeContractAsync({
+      const allowance = await readContract(wagmiConfig, {
         abi: TokenABI as never,
         address: appConfig.sDaiTokenAddress as `0x${string}`,
-        functionName: 'approve',
-        args: [appConfig.stakingVaultAddress, amountParsed],
-      })
+        functionName: 'allowance',
+        args: [userAddress, appConfig.stakingVaultAddress]
+      }) as bigint
+      console.log('Allowance:', allowance)
 
-      console.log('approveHash', approveHash)
-      await waitForTransactionReceipt(wagmiConfig, { hash: approveHash })
+      if(amountParsed > allowance) {
+        const approveHash = await writeContractAsync({
+          abi: TokenABI as never,
+          address: appConfig.sDaiTokenAddress as `0x${string}`,
+          functionName: 'approve',
+          args: [appConfig.stakingVaultAddress, amountParsed],
+        })
+        console.log('approveHash', approveHash)
+        await waitForTransactionReceipt(wagmiConfig, { hash: approveHash })
+      }
 
       const depositHash = await writeContractAsync({
         abi: StakingVaultABI,
