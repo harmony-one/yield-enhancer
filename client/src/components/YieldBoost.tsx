@@ -20,8 +20,8 @@ export default function YieldBoost() {
       <Header />
 
       <div className="max-w-[1400px] mx-auto px-4 py-8 flex flex-col items-center">
-        <h1 className="text-4xl font-bold text-center mb-8">Simple. DeFi.</h1>
-        
+        {/*<h1 className="text-4xl font-bold text-center mb-8">Simple. DeFi.</h1>*/}
+
         <div className="w-full max-w-xl mx-auto">
           <YieldBoostCard
             availableBalance={availableBalance}

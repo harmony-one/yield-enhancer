@@ -42,10 +42,13 @@ export function useYieldBoost() {
     const updatePreviewAmount = async () => {
       try {
         const amountParsed = parseUnits(debouncedAmount.toString(), 18)
+        const functionName = activeTab === 'deposit'
+          ? 'previewDeposit'
+          : 'previewRedeem'
         const estimateValue = await readContract(wagmiConfig, {
           abi: StakingVaultABI,
           address: appConfig.stakingVaultAddress as `0x${string}`,
-          functionName: activeTab === 'deposit' ? 'previewDeposit' : 'previewWithdraw',
+          functionName,
           args: [amountParsed]
         }) as bigint
         const estimateValueNumber = formatUnits(estimateValue, 18)
@@ -96,11 +99,10 @@ export function useYieldBoost() {
   const handleWithdraw = async () => {
     try {
       const amountParsed = parseUnits(amount.toString(), 18)
-      console.log('amountParsed', amountParsed)
       const withdrawHash = await writeContractAsync({
         abi: StakingVaultABI,
         address: appConfig.stakingVaultAddress as `0x${string}`,
-        functionName: 'withdraw',
+        functionName: 'redeem',
         args: [amountParsed, userAddress, userAddress],
       })
       console.log('Withdraw txnHash:', withdrawHash)
