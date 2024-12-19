@@ -149,18 +149,20 @@ export function useYieldBoost() {
   const updateVaultData = async () => {
     try {
       const [vaultInitBlock, totalAssets, totalSupply] = await Promise.all([
-        getBlock(wagmiConfig, { blockNumber: appConfig.stakingVaultLaunchBlock }),
+        getBlock(wagmiConfig, { blockNumber: appConfig.stakingVaultLaunchBlock, chainId: harmonyOne.id }),
         readContract(wagmiConfig, {
           abi: StakingVaultABI,
           address: appConfig.stakingVaultAddress as `0x${string}`,
           functionName: 'totalAssets',
-          args: []
+          args: [],
+          chainId: harmonyOne.id,
         }),
         readContract(wagmiConfig, {
           abi: StakingVaultABI,
           address: appConfig.stakingVaultAddress as `0x${string}`,
           functionName: 'totalSupply',
-          args: []
+          args: [],
+          chainId: harmonyOne.id,
         })
       ]) as [GetBlockReturnType, bigint, bigint]
       setVaultData({
