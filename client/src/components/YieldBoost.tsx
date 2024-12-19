@@ -1,7 +1,6 @@
 import { Header } from './Header';
 import { YieldBoostCard } from './YieldBoostCard';
 import { useYieldBoost } from '@/hooks/useYieldBoost';
-import { CURRENT_APY } from '@/lib/constants';
 
 export default function YieldBoost() {
   const {
@@ -13,6 +12,7 @@ export default function YieldBoost() {
     handleBoostYield,
     handleWithdraw,
     setActiveTab,
+    currentAPY
   } = useYieldBoost();
 
   return (
@@ -32,7 +32,7 @@ export default function YieldBoost() {
             onBoost={handleBoostYield}
             onWithdraw={handleWithdraw}
             previewAmount={previewAmount}
-            currentAPY={CURRENT_APY}
+            currentAPY={currentAPY}
             onTabChange={setActiveTab}
           />
 

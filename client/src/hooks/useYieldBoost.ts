@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect, useMemo} from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import {useAccount, useBalance, useWriteContract} from "wagmi";
-import {readContract} from "@wagmi/core";
+import {readContract, getBlock, GetBlockReturnType} from "@wagmi/core";
 import StakingVaultABI from "../abi/StakingVault.json";
 import TokenABI from "../abi/Token.json";
 import {appConfig} from "@/config.ts";
@@ -10,11 +10,29 @@ import {waitForTransactionReceipt} from "wagmi/actions";
 import {wagmiConfig} from "@/providers/Web3Provider.tsx";
 import {harmonyOne} from "wagmi/chains";
 import useDebounce from "@/hooks/useDebounce.ts";
+import {INITIAL_EXCHANGE_RATE} from "@/lib/constants.ts";
+import usePoller from "@/hooks/usePoller.ts";
+import useActiveTab from "@/hooks/useActiveTab.ts";
+
+interface VaultData {
+  vaultCreateTimestamp: bigint
+  totalAssets: bigint
+  totalSupply: bigint
+}
+
+const defaultVaultData: VaultData = {
+  vaultCreateTimestamp: 0n,
+  totalAssets: 0n,
+  totalSupply: 0n
+}
 
 export function useYieldBoost() {
   const [amount, setAmount] = useState("");
   const [previewAmount, setPreviewAmount] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'deposit' | 'withdraw'>('deposit');
+  const [vaultData, setVaultData] = useState(defaultVaultData)
+
+  const isTabActive = useActiveTab()
   const { toast } = useToast();
   const { writeContractAsync } = useWriteContract()
   const { address: userAddress, isConnected } = useAccount()
@@ -126,6 +144,39 @@ export function useYieldBoost() {
     }
   }
 
+  const updateVaultData = async () => {
+    try {
+      const [vaultInitBlock, totalAssets, totalSupply] = await Promise.all([
+        getBlock(wagmiConfig, { blockNumber: appConfig.stakingVaultLaunchBlock }),
+        readContract(wagmiConfig, {
+          abi: StakingVaultABI,
+          address: appConfig.stakingVaultAddress as `0x${string}`,
+          functionName: 'totalAssets',
+          args: []
+        }),
+        readContract(wagmiConfig, {
+          abi: StakingVaultABI,
+          address: appConfig.stakingVaultAddress as `0x${string}`,
+          functionName: 'totalSupply',
+          args: []
+        })
+      ]) as [GetBlockReturnType, bigint, bigint]
+      setVaultData({
+        vaultCreateTimestamp: vaultInitBlock.timestamp,
+        totalSupply,
+        totalAssets
+      })
+    } catch (e) {
+      console.error('Failed to update vault data:', e);
+    }
+  }
+
+  usePoller(() => {
+    if(isTabActive) {
+      updateVaultData()
+    }
+  }, 30 * 1000)
+
   // const handleBoostYield = useCallback(() => {
   //   const depositAmount = parseFloat(amount);
   //   if (!isNaN(depositAmount) && depositAmount <= availableBalance) {
@@ -171,6 +222,23 @@ export function useYieldBoost() {
   const availableBalance = (tokenBalance ? +tokenBalance?.formatted : 0)
   const boostedAmount = (sharesBalance ? +sharesBalance?.formatted : 0)
 
+  const currentAPY = useMemo(() => {
+    const daysSinceVaultLaunch = Math.floor((
+      Math.round(Date.now() / 1000) - Number(vaultData.vaultCreateTimestamp)
+    ) / (24 * 60 * 60))
+    const initialSharePrice = INITIAL_EXCHANGE_RATE
+    const currentSharePrice = vaultData.totalSupply !== 0n
+      ? (Number(vaultData.totalAssets) / Number(vaultData.totalSupply))
+      : 0
+
+    const interestRate = (currentSharePrice / initialSharePrice) - 1
+
+    const annualInterestRate = Math.pow(
+      (1 + interestRate), Math.round(1 / (daysSinceVaultLaunch / 365))
+    ) - 1
+    return (annualInterestRate * 100).toFixed(2)
+  }, [vaultData])
+
   return {
     isConnected,
     amount,
@@ -182,5 +250,6 @@ export function useYieldBoost() {
     setActiveTab,
     handleBoostYield,
     handleWithdraw,
+    currentAPY
   };
 }
