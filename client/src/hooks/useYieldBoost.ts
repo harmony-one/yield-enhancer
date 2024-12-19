@@ -226,6 +226,15 @@ export function useYieldBoost() {
   const availableBalance = (tokenBalance ? +tokenBalance?.formatted : 0)
   const boostedAmount = (sharesBalance ? +sharesBalance?.formatted : 0)
 
+  /*
+
+  Share price at t0 = totalAssets at T0 / totalSupply at T0
+  Share price at t1 = totalAssets at T1 / totalSupply at T1
+  Interest Rate = (Share price at t0 / Share price at t1) - 1
+  Time Delta = days since vault launch / 365
+  APY = (1 + Interest Rate) ^ (Time Delta) - 1
+
+  * */
   const currentAPY = useMemo(() => {
     const daysSinceVaultLaunch = Math.floor((
       Math.round(Date.now() / 1000) - Number(vaultData.vaultCreateTimestamp)
@@ -234,14 +243,14 @@ export function useYieldBoost() {
     if(daysSinceVaultLaunch > 0) {
       const initialSharePrice = INITIAL_EXCHANGE_RATE
       const currentSharePrice = vaultData.totalSupply !== 0n
-        ? (Number(vaultData.totalAssets) / Number(vaultData.totalSupply))
+        ? Number(vaultData.totalAssets) / Number(vaultData.totalSupply)
         : 0
 
       const interestRate = (currentSharePrice / initialSharePrice) - 1
-      const annualInterestRate = Math.pow(
-        (1 + interestRate), Math.round(1 / (daysSinceVaultLaunch / 365))
+      const apy = Math.pow(
+        (1 + interestRate), daysSinceVaultLaunch / 365
       ) - 1
-      return (annualInterestRate * 100).toFixed(2)
+      return (apy * 100).toFixed(2)
     }
     return '0'
   }, [vaultData])
