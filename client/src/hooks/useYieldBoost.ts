@@ -6,7 +6,7 @@ import StakingVaultABI from "../abi/StakingVault.json";
 import TokenABI from "../abi/Token.json";
 import {appConfig} from "@/config.ts";
 import {formatUnits, parseUnits} from "viem";
-import {waitForTransactionReceipt} from "wagmi/actions";
+import {waitForTransactionReceipt, switchChain} from "wagmi/actions";
 import {wagmiConfig} from "@/providers/Web3Provider.tsx";
 import {harmonyOne} from "wagmi/chains";
 import useDebounce from "@/hooks/useDebounce.ts";
@@ -84,6 +84,7 @@ export function useYieldBoost() {
 
   const handleBoostYield = async () => {
     try {
+      await switchChain(wagmiConfig, { chainId: harmonyOne.id })
       const amountParsed = parseUnits(amount.toString(), 18)
 
       const allowance = await readContract(wagmiConfig, {
@@ -125,6 +126,7 @@ export function useYieldBoost() {
 
   const handleWithdraw = async () => {
     try {
+      await switchChain(wagmiConfig, { chainId: harmonyOne.id })
       const amountParsed = parseUnits(amount.toString(), 18)
       const withdrawHash = await writeContractAsync({
         abi: StakingVaultABI,
