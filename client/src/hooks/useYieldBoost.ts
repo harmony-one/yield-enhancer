@@ -226,17 +226,20 @@ export function useYieldBoost() {
     const daysSinceVaultLaunch = Math.floor((
       Math.round(Date.now() / 1000) - Number(vaultData.vaultCreateTimestamp)
     ) / (24 * 60 * 60))
-    const initialSharePrice = INITIAL_EXCHANGE_RATE
-    const currentSharePrice = vaultData.totalSupply !== 0n
-      ? (Number(vaultData.totalAssets) / Number(vaultData.totalSupply))
-      : 0
 
-    const interestRate = (currentSharePrice / initialSharePrice) - 1
+    if(daysSinceVaultLaunch > 0) {
+      const initialSharePrice = INITIAL_EXCHANGE_RATE
+      const currentSharePrice = vaultData.totalSupply !== 0n
+        ? (Number(vaultData.totalAssets) / Number(vaultData.totalSupply))
+        : 0
 
-    const annualInterestRate = Math.pow(
-      (1 + interestRate), Math.round(1 / (daysSinceVaultLaunch / 365))
-    ) - 1
-    return (annualInterestRate * 100).toFixed(2)
+      const interestRate = (currentSharePrice / initialSharePrice) - 1
+      const annualInterestRate = Math.pow(
+        (1 + interestRate), Math.round(1 / (daysSinceVaultLaunch / 365))
+      ) - 1
+      return (annualInterestRate * 100).toFixed(2)
+    }
+    return '0'
   }, [vaultData])
 
   return {

@@ -1,5 +1,5 @@
 // Protocol Constants
-export const INITIAL_EXCHANGE_RATE = 1.99; // 1 boostDAI = 1.05 1sDAI (initially)
+export const INITIAL_EXCHANGE_RATE = 2; // 1 boostDAI = 1.05 1sDAI (initially)
 export const DEPOSIT_FEE = 0.001; // 0.1%
 export const WITHDRAWAL_FEE = 0.001; // 0.1%
 
