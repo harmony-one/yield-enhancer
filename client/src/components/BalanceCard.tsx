@@ -4,7 +4,7 @@ import { formatNumber } from "@/lib/utils";
 interface BalanceCardProps {
   availableBalance: number;
   boostedAmount: number | null;
-  currentAPY: number;
+  currentAPY: string;
 }
 
 export function BalanceCard({ availableBalance, boostedAmount, currentAPY }: BalanceCardProps) {

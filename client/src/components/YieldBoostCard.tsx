@@ -21,7 +21,7 @@ interface YieldBoostCardProps {
   onBoost: () => void;
   onWithdraw: () => void;
   previewAmount: number | null;
-  currentAPY: number;
+  currentAPY: string;
   onTabChange: (tab: 'deposit' | 'withdraw') => void;
 }
 
