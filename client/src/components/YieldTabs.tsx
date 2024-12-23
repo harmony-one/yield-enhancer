@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowRightLeft } from 'lucide-react';
 import { formatNumber } from "@/lib/utils";
 import {DEPOSIT_FEE, WITHDRAWAL_FEE} from "@/lib/constants.ts";
+import {useMemo} from "react";
+import {useYieldBoost} from "@/hooks/useYieldBoost.ts";
+import Decimal from "decimal.js";
 
 interface YieldTabsProps {
   amount: string;
@@ -27,6 +30,20 @@ export function YieldTabs({
   boostedAmount,
   onTabChange,
 }: YieldTabsProps) {
+  const { activeTab } = useYieldBoost();
+
+  const previewAmountWithFee = useMemo(() => {
+    if(previewAmount) {
+      const amount = new Decimal(previewAmount)
+      if(activeTab === "deposit") {
+        return amount.sub(amount.mul(DEPOSIT_FEE)).toNumber()
+      } else if(activeTab === "withdraw") {
+        return amount.sub(amount.mul(WITHDRAWAL_FEE)).toNumber()
+      }
+    }
+    return 0
+  }, [activeTab, previewAmount])
+
   return (
     <Tabs
       defaultValue="deposit"
@@ -66,7 +83,7 @@ export function YieldTabs({
         {previewAmount !== null && (
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <ArrowRightLeft className="h-4 w-4" />
-            <span>You will receive: {formatNumber(previewAmount)} boostDAI, fee: {DEPOSIT_FEE * 100}%</span>
+            <span>You will receive: {formatNumber(previewAmountWithFee)} boostDAI, fee: {DEPOSIT_FEE * 100}%</span>
           </div>
         )}
 
@@ -102,7 +119,7 @@ export function YieldTabs({
         {previewAmount !== null && (
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <ArrowRightLeft className="h-4 w-4" />
-            <span>You will receive: {formatNumber(previewAmount)} 1sDAI, fee: {WITHDRAWAL_FEE * 100}%</span>
+            <span>You will receive: {formatNumber(previewAmountWithFee)} 1sDAI, fee: {WITHDRAWAL_FEE * 100}%</span>
           </div>
         )}
 
