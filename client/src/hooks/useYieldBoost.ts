@@ -13,17 +13,20 @@ import useDebounce from "@/hooks/useDebounce.ts";
 import {INITIAL_EXCHANGE_RATE} from "@/lib/constants.ts";
 import usePoller from "@/hooks/usePoller.ts";
 import useActiveTab from "@/hooks/useActiveTab.ts";
+import {getRewardsInfo, VaultRewardsInfo} from "@/api";
+import Decimal from "decimal.js";
 
 interface VaultData {
   vaultCreateTimestamp: bigint
   totalAssets: bigint
   totalSupply: bigint
+  rewardsInfo?: VaultRewardsInfo
 }
 
 const defaultVaultData: VaultData = {
   vaultCreateTimestamp: 0n,
   totalAssets: 0n,
-  totalSupply: 0n
+  totalSupply: 0n,
 }
 
 export function useYieldBoost() {
@@ -148,7 +151,13 @@ export function useYieldBoost() {
 
   const updateVaultData = async () => {
     try {
-      const [vaultInitBlock, totalAssets, totalSupply] = await Promise.all([
+      const [
+        rewardsInfo,
+        vaultInitBlock,
+        totalAssets,
+        totalSupply
+      ] = await Promise.all([
+        getRewardsInfo(),
         getBlock(wagmiConfig, { blockNumber: appConfig.stakingVaultLaunchBlock, chainId: harmonyOne.id }),
         readContract(wagmiConfig, {
           abi: StakingVaultABI,
@@ -164,11 +173,13 @@ export function useYieldBoost() {
           args: [],
           chainId: harmonyOne.id,
         })
-      ]) as [GetBlockReturnType, bigint, bigint]
+      ]) as [VaultRewardsInfo, GetBlockReturnType, bigint, bigint]
+
       setVaultData({
         vaultCreateTimestamp: vaultInitBlock.timestamp,
         totalSupply,
-        totalAssets
+        totalAssets,
+        rewardsInfo
       })
     } catch (e) {
       console.error('Failed to update vault data:', e);
@@ -250,7 +261,25 @@ export function useYieldBoost() {
       const apy = Math.pow(
         (1 + interestRate), daysSinceVaultLaunch / 365
       ) - 1
-      return (apy * 100).toFixed(2)
+
+      let activeAPY = 0
+      // (current 1sDAI yield + (current 1sDAI streamed per day from reward contract)*365/Current TVL*100))
+      if(vaultData.rewardsInfo) {
+        const { sync } = vaultData.rewardsInfo
+        const epochDuration = Number(sync.epochDuration)
+        const rewardsPerEpoch = new Decimal(sync.rewardsPerEpoch).div(10 ** 18).toNumber()
+        const secondsInAnHour = 60 * 60;
+
+        const hoursInEpoch = epochDuration < secondsInAnHour ? 1 : epochDuration / secondsInAnHour;
+        const epochsPerHour = hoursInEpoch === 1 ? secondsInAnHour / epochDuration : 1 / hoursInEpoch;
+        const hourlyRewards = (rewardsPerEpoch / hoursInEpoch) * epochsPerHour;
+        const dailyReward = 24 * hourlyRewards
+
+        const tvl = new Decimal(String(vaultData.totalAssets)).div(10 ** 18).toNumber()
+        activeAPY = dailyReward * 365 / tvl
+      }
+
+      return ((apy + activeAPY) * 100).toFixed(2)
     }
     return '0'
   }, [vaultData])
@@ -266,6 +295,7 @@ export function useYieldBoost() {
     setActiveTab,
     handleBoostYield,
     handleWithdraw,
-    currentAPY
+    currentAPY,
+    vaultData
   };
 }
