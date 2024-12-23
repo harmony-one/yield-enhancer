@@ -6,6 +6,7 @@ import { formatNumber } from "@/lib/utils";
 import {useMemo} from "react";
 import {formatUnits} from "viem";
 import {useYieldBoost} from "@/hooks/useYieldBoost.ts";
+import Decimal from "decimal.js";
 
 interface YieldBoostCardProps {
   availableBalance: number;
@@ -38,6 +39,16 @@ export function YieldBoostCard({
     return Number(formatUnits(vaultData.totalAssets, 18))
   }, [vaultData])
 
+  const exchangeRate = useMemo(() => {
+    const {totalSupply, totalAssets} = vaultData
+    if(totalSupply > 0n) {
+      return new Decimal(String(totalAssets))
+        .div(String(totalSupply))
+        .toFixed(2)
+    }
+    return '-'
+  }, [vaultData])
+
   return (
     <Card className="bg-[#1A1A1A]/80 backdrop-blur-sm border-cyan-500/20 text-white">
       <CardContent className="p-6 space-y-6">
@@ -67,6 +78,10 @@ export function YieldBoostCard({
         <div className="w-full text-center space-y-1">
           <p className="text-sm text-gray-400">TVL</p>
           <p className="font-semibold">{formatNumber(tvl)} 1sDAI</p>
+        </div>
+        <div className="w-full text-center space-y-1">
+          <p className="text-sm text-gray-400">Exchange Rate</p>
+          <p className="font-semibold">{exchangeRate}</p>
         </div>
       </CardFooter>
     </Card>
