@@ -247,39 +247,41 @@ export function useYieldBoost() {
 
   * */
   const currentAPY = useMemo(() => {
-    const daysSinceVaultLaunch = Math.floor((
-      Math.round(Date.now() / 1000) - Number(vaultData.vaultCreateTimestamp)
-    ) / (24 * 60 * 60))
+    if(vaultData.vaultCreateTimestamp > 0n) {
+      const daysSinceVaultLaunch = Math.floor((
+        Math.round(Date.now() / 1000) - Number(vaultData.vaultCreateTimestamp)
+      ) / (24 * 60 * 60))
 
-    if(daysSinceVaultLaunch > 0) {
-      const initialSharePrice = INITIAL_EXCHANGE_RATE
-      const currentSharePrice = vaultData.totalSupply !== 0n
-        ? Number(vaultData.totalAssets) / Number(vaultData.totalSupply)
-        : 0
+      if(daysSinceVaultLaunch > 0) {
+        const initialSharePrice = INITIAL_EXCHANGE_RATE
+        const currentSharePrice = vaultData.totalSupply !== 0n
+          ? Number(vaultData.totalAssets) / Number(vaultData.totalSupply)
+          : 0
 
-      const interestRate = (currentSharePrice / initialSharePrice) - 1
-      const apy = Math.pow(
-        (1 + interestRate), daysSinceVaultLaunch / 365
-      ) - 1
+        const interestRate = (currentSharePrice / initialSharePrice) - 1
+        const apy = Math.pow(
+          (1 + interestRate), daysSinceVaultLaunch / 365
+        ) - 1
 
-      let activeAPY = 0
-      // (current 1sDAI yield + (current 1sDAI streamed per day from reward contract)*365/Current TVL*100))
-      if(vaultData.rewardsInfo) {
-        const { sync } = vaultData.rewardsInfo
-        const epochDuration = Number(sync.epochDuration)
-        const rewardsPerEpoch = new Decimal(sync.rewardsPerEpoch).div(10 ** 18).toNumber()
-        const secondsInAnHour = 60 * 60;
+        let activeAPY = 0
+        // (current 1sDAI yield + (current 1sDAI streamed per day from reward contract)*365/Current TVL*100))
+        if(vaultData.rewardsInfo) {
+          const { sync } = vaultData.rewardsInfo
+          const epochDuration = Number(sync.epochDuration)
+          const rewardsPerEpoch = new Decimal(sync.rewardsPerEpoch).div(10 ** 18).toNumber()
+          const secondsInAnHour = 60 * 60;
 
-        const hoursInEpoch = epochDuration < secondsInAnHour ? 1 : epochDuration / secondsInAnHour;
-        const epochsPerHour = hoursInEpoch === 1 ? secondsInAnHour / epochDuration : 1 / hoursInEpoch;
-        const hourlyRewards = (rewardsPerEpoch / hoursInEpoch) * epochsPerHour;
-        const dailyReward = 24 * hourlyRewards
+          const hoursInEpoch = epochDuration < secondsInAnHour ? 1 : epochDuration / secondsInAnHour;
+          const epochsPerHour = hoursInEpoch === 1 ? secondsInAnHour / epochDuration : 1 / hoursInEpoch;
+          const hourlyRewards = (rewardsPerEpoch / hoursInEpoch) * epochsPerHour;
+          const dailyReward = 24 * hourlyRewards
 
-        const tvl = new Decimal(String(vaultData.totalAssets)).div(10 ** 18).toNumber()
-        activeAPY = dailyReward * 365 / tvl
+          const tvl = new Decimal(String(vaultData.totalAssets)).div(10 ** 18).toNumber()
+          activeAPY = dailyReward * 365 / tvl
+        }
+
+        return ((apy + activeAPY) * 100).toFixed(2)
       }
-
-      return ((apy + activeAPY) * 100).toFixed(2)
     }
     return '0'
   }, [vaultData])
