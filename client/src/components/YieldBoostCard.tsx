@@ -80,8 +80,8 @@ export function YieldBoostCard({
           <p className="font-semibold">{formatNumber(tvl)} 1sDAI</p>
         </div>
         <div className="w-full text-center space-y-1">
-          <p className="text-sm text-gray-400">Exchange Rate</p>
-          <p className="font-semibold">{exchangeRate}</p>
+          <p className="text-sm text-gray-400">boostDAI Exchange Rate</p>
+          <p className="font-semibold">{exchangeRate} 1sDAI</p>
         </div>
       </CardFooter>
     </Card>

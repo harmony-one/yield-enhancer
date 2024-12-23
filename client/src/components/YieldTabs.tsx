@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ArrowRightLeft } from 'lucide-react';
 import { formatNumber } from "@/lib/utils";
+import {DEPOSIT_FEE, WITHDRAWAL_FEE} from "@/lib/constants.ts";
 
 interface YieldTabsProps {
   amount: string;
@@ -27,8 +28,8 @@ export function YieldTabs({
   onTabChange,
 }: YieldTabsProps) {
   return (
-    <Tabs 
-      defaultValue="deposit" 
+    <Tabs
+      defaultValue="deposit"
       className="w-full"
       onValueChange={(value) => onTabChange(value as 'deposit' | 'withdraw')}
     >
@@ -65,12 +66,12 @@ export function YieldTabs({
         {previewAmount !== null && (
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <ArrowRightLeft className="h-4 w-4" />
-            <span>You will receive: {formatNumber(previewAmount)} boostDAI</span>
+            <span>You will receive: {formatNumber(previewAmount)} boostDAI, fee: {DEPOSIT_FEE * 100}%</span>
           </div>
         )}
 
-        <Button 
-          className="w-full py-6 text-lg bg-cyan-500 hover:bg-cyan-600 text-black" 
+        <Button
+          className="w-full py-6 text-lg bg-cyan-500 hover:bg-cyan-600 text-black"
           onClick={onBoost}
         >
           Boost Yield
@@ -101,13 +102,13 @@ export function YieldTabs({
         {previewAmount !== null && (
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <ArrowRightLeft className="h-4 w-4" />
-            <span>You will receive: {formatNumber(previewAmount)} 1sDAI</span>
+            <span>You will receive: {formatNumber(previewAmount)} 1sDAI, fee: {WITHDRAWAL_FEE * 100}%</span>
           </div>
         )}
 
-        <Button 
-          className="w-full py-6 text-lg bg-black/40 border border-[#7FF4E3]/20 text-[#7FF4E3] hover:bg-[#7FF4E3]/10" 
-          variant="outline" 
+        <Button
+          className="w-full py-6 text-lg bg-black/40 border border-[#7FF4E3]/20 text-[#7FF4E3] hover:bg-[#7FF4E3]/10"
+          variant="outline"
           onClick={onWithdraw}
         >
           Withdraw
