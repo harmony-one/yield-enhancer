@@ -16,7 +16,7 @@ import useActiveTab from "@/hooks/useActiveTab.ts";
 import {getRewardsInfo, VaultRewardsInfo} from "@/api";
 import Decimal from "decimal.js";
 
-interface VaultData {
+export interface VaultData {
   vaultCreateTimestamp: bigint
   totalAssets: bigint
   totalSupply: bigint
@@ -34,6 +34,7 @@ export function useYieldBoost() {
   const [previewAmount, setPreviewAmount] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'deposit' | 'withdraw'>('deposit');
   const [vaultData, setVaultData] = useState(defaultVaultData)
+  const [inProgress, setInProgress] = useState(false);
 
   const isTabActive = useActiveTab()
   const { toast } = useToast();
@@ -87,6 +88,7 @@ export function useYieldBoost() {
 
   const handleBoostYield = async () => {
     try {
+      setInProgress(true)
       await switchChain(wagmiConfig, { chainId: harmonyOne.id })
       const amountParsed = parseUnits(amount.toString(), 18)
 
@@ -124,11 +126,14 @@ export function useYieldBoost() {
       setAmount('')
     } catch (e) {
       console.error('Failed to deposit:', e);
+    } finally {
+      setInProgress(false)
     }
   }
 
   const handleWithdraw = async () => {
     try {
+      setInProgress(true)
       await switchChain(wagmiConfig, { chainId: harmonyOne.id })
       const amountParsed = parseUnits(amount.toString(), 18)
       const withdrawHash = await writeContractAsync({
@@ -146,6 +151,8 @@ export function useYieldBoost() {
       setAmount("");
     } catch(e) {
       console.error('Failed to withdraw:', e);
+    } finally {
+      setInProgress(false)
     }
   }
 
@@ -191,48 +198,6 @@ export function useYieldBoost() {
       updateVaultData()
     }
   }, 30 * 1000)
-
-  // const handleBoostYield = useCallback(() => {
-  //   const depositAmount = parseFloat(amount);
-  //   if (!isNaN(depositAmount) && depositAmount <= availableBalance) {
-  //     const withFee = depositAmount * (1 - DEPOSIT_FEE);
-  //     const boostedValue = withFee / EXCHANGE_RATE;
-  //     setBoostedAmount((prev) => (prev || 0) + boostedValue);
-  //     setAvailableBalance((prev) => prev - depositAmount);
-  //     toast({
-  //       title: "Yield Boosted",
-  //       description: `${formatToken(boostedValue, 'boostDAI')} is now earning boosted yield.`,
-  //     });
-  //     setAmount("");
-  //   } else {
-  //     toast({
-  //       title: "Invalid Amount",
-  //       description: "Please enter a valid amount within your available balance.",
-  //       variant: "destructive",
-  //     });
-  //   }
-  // }, [amount, availableBalance, toast]);
-
-  // const handleWithdraw = useCallback(() => {
-  //   const withdrawAmount = parseFloat(amount);
-  //   if (!isNaN(withdrawAmount) && boostedAmount !== null && withdrawAmount <= boostedAmount) {
-  //     const baseAmount = withdrawAmount * EXCHANGE_RATE;
-  //     const withFee = baseAmount * (1 - WITHDRAWAL_FEE);
-  //     setBoostedAmount((prev) => (prev || 0) - withdrawAmount);
-  //     // setAvailableBalance((prev) => prev + withFee);
-  //     toast({
-  //       title: "Withdrawal Successful",
-  //       description: `${formatToken(withFee, '1sDAI')} has been returned to your available balance.`,
-  //     });
-  //     setAmount("");
-  //   } else {
-  //     toast({
-  //       title: "Invalid Amount",
-  //       description: "Please enter a valid amount within your boosted balance.",
-  //       variant: "destructive",
-  //     });
-  //   }
-  // }, [amount, boostedAmount, toast]);
 
   const availableBalance = (tokenBalance ? +tokenBalance?.formatted : 0)
   const boostedAmount = (sharesBalance ? +sharesBalance?.formatted : 0)
@@ -298,6 +263,7 @@ export function useYieldBoost() {
     handleBoostYield,
     handleWithdraw,
     currentAPY,
-    vaultData
+    vaultData,
+    inProgress
   };
 }

@@ -12,7 +12,10 @@ export default function YieldBoost() {
     handleBoostYield,
     handleWithdraw,
     setActiveTab,
-    currentAPY
+    currentAPY,
+    vaultData,
+    inProgress,
+    activeTab
   } = useYieldBoost();
 
   return (
@@ -34,6 +37,9 @@ export default function YieldBoost() {
             previewAmount={previewAmount}
             currentAPY={currentAPY}
             onTabChange={setActiveTab}
+            vaultData={vaultData}
+            inProgress={inProgress}
+            activeTab={activeTab}
           />
 
           <p className="text-sm text-center text-gray-400 mt-4">

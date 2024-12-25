@@ -6,8 +6,9 @@ import { ArrowRightLeft } from 'lucide-react';
 import { formatNumber } from "@/lib/utils";
 import {DEPOSIT_FEE, WITHDRAWAL_FEE} from "@/lib/constants.ts";
 import {useMemo} from "react";
-import {useYieldBoost} from "@/hooks/useYieldBoost.ts";
 import Decimal from "decimal.js";
+import {Spinner} from "@/components/ui/spinner.tsx";
+import {VaultData} from "@/hooks/useYieldBoost.ts";
 
 interface YieldTabsProps {
   amount: string;
@@ -17,6 +18,9 @@ interface YieldTabsProps {
   onWithdraw: () => void;
   previewAmount: number | null;
   boostedAmount: number | null;
+  activeTab: 'deposit' | 'withdraw';
+  vaultData: VaultData;
+  inProgress: boolean;
   onTabChange: (tab: 'deposit' | 'withdraw') => void;
 }
 
@@ -28,10 +32,10 @@ export function YieldTabs({
   onWithdraw,
   previewAmount,
   boostedAmount,
+  activeTab,
+  inProgress,
   onTabChange,
 }: YieldTabsProps) {
-  const { activeTab } = useYieldBoost();
-
   const previewAmountWithFee = useMemo(() => {
     if(previewAmount) {
       const amount = new Decimal(previewAmount)
@@ -89,8 +93,10 @@ export function YieldTabs({
 
         <Button
           className="w-full py-6 text-lg bg-cyan-500 hover:bg-cyan-600 text-black"
+          disabled={inProgress}
           onClick={onBoost}
         >
+          {inProgress && <Spinner />}
           Boost Yield
         </Button>
       </TabsContent>
@@ -126,8 +132,10 @@ export function YieldTabs({
         <Button
           className="w-full py-6 text-lg bg-black/40 border border-[#7FF4E3]/20 text-[#7FF4E3] hover:bg-[#7FF4E3]/10"
           variant="outline"
+          disabled={inProgress}
           onClick={onWithdraw}
         >
+          {inProgress && <Spinner />}
           Withdraw
         </Button>
       </TabsContent>

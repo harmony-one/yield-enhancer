@@ -5,8 +5,8 @@ import { HowItWorksDialog } from "./HowItWorksDialog";
 import { formatNumber } from "@/lib/utils";
 import {useMemo} from "react";
 import {formatUnits} from "viem";
-import {useYieldBoost} from "@/hooks/useYieldBoost.ts";
 import Decimal from "decimal.js";
+import {VaultData} from "@/hooks/useYieldBoost.ts";
 
 interface YieldBoostCardProps {
   availableBalance: number;
@@ -18,6 +18,9 @@ interface YieldBoostCardProps {
   onWithdraw: () => void;
   previewAmount: number | null;
   currentAPY: string;
+  activeTab: 'deposit' | 'withdraw'
+  inProgress: boolean;
+  vaultData: VaultData
   onTabChange: (tab: 'deposit' | 'withdraw') => void;
 }
 
@@ -32,9 +35,10 @@ export function YieldBoostCard({
   previewAmount,
   currentAPY,
   onTabChange,
+  activeTab,
+  inProgress,
+  vaultData
 }: YieldBoostCardProps) {
-  const { vaultData } = useYieldBoost()
-
   const tvl = useMemo(() => {
     return Number(formatUnits(vaultData.totalAssets, 18))
   }, [vaultData])
@@ -67,10 +71,13 @@ export function YieldBoostCard({
           previewAmount={previewAmount}
           boostedAmount={boostedAmount}
           onTabChange={onTabChange}
+          activeTab={activeTab}
+          vaultData={vaultData}
+          inProgress={inProgress}
         />
 
         <div className="flex justify-center">
-          <HowItWorksDialog />
+          <HowItWorksDialog currentAPY={currentAPY} />
         </div>
       </CardContent>
 

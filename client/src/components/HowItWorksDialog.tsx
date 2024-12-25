@@ -2,11 +2,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "@/components/ui/button";
 import { HelpCircle } from 'lucide-react';
 import {INITIAL_EXCHANGE_RATE} from "@/lib/constants";
-import {useYieldBoost} from "@/hooks/useYieldBoost.ts";
 
-export function HowItWorksDialog() {
-  const { currentAPY } = useYieldBoost();
-
+export function HowItWorksDialog(props: {
+  currentAPY: string
+}) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -33,7 +32,7 @@ export function HowItWorksDialog() {
         <div className="py-4">
           <h4 className="text-sm font-medium mb-2">Key Benefits:</h4>
           <ul className="list-disc list-inside text-sm space-y-1 text-gray-400">
-            <li>Current APY: {currentAPY}%</li>
+            <li>Current APY: {props.currentAPY}%</li>
             <li>Yield earned through increasing exchange rate</li>
             <li>Instant deposits and withdrawals</li>
             <li>No minimum deposit required</li>
