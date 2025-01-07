@@ -41,7 +41,7 @@ export function YieldBoostCard({
 }: YieldBoostCardProps) {
   const tvl = useMemo(() => {
     return Number(formatUnits(vaultData.totalAssets, 18))
-  }, [vaultData])
+  }, [vaultData.totalAssets])
 
   const exchangeRate = useMemo(() => {
     const {totalSupply, totalAssets} = vaultData
