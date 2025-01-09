@@ -217,7 +217,7 @@ export function useYieldBoost() {
         Math.round(Date.now() / 1000) - Number(vaultData.vaultCreateTimestamp)
       ) / (24 * 60 * 60))
 
-      if(daysSinceVaultLaunch > 0) {
+      if(daysSinceVaultLaunch >= 0) {
         const initialSharePrice = INITIAL_EXCHANGE_RATE
         const currentSharePrice = vaultData.totalSupply !== 0n
           ? Number(vaultData.totalAssets) / Number(vaultData.totalSupply)
