@@ -10,7 +10,6 @@ import {waitForTransactionReceipt, switchChain} from "wagmi/actions";
 import {wagmiConfig} from "@/providers/Web3Provider.tsx";
 import {harmonyOne} from "wagmi/chains";
 import useDebounce from "@/hooks/useDebounce.ts";
-import {INITIAL_EXCHANGE_RATE} from "@/lib/constants.ts";
 import usePoller from "@/hooks/usePoller.ts";
 import useActiveTab from "@/hooks/useActiveTab.ts";
 import {getRewardsInfo, VaultRewardsInfo} from "@/api";
@@ -218,15 +217,15 @@ export function useYieldBoost() {
       ) / (24 * 60 * 60))
 
       if(daysSinceVaultLaunch >= 0) {
-        const initialSharePrice = INITIAL_EXCHANGE_RATE
-        const currentSharePrice = vaultData.totalSupply !== 0n
-          ? Number(vaultData.totalAssets) / Number(vaultData.totalSupply)
-          : 0
-
-        const interestRate = (currentSharePrice / initialSharePrice) - 1
-        const apy = Math.pow(
-          (1 + interestRate), daysSinceVaultLaunch / 365
-        ) - 1
+        // const initialSharePrice = INITIAL_EXCHANGE_RATE
+        // const currentSharePrice = vaultData.totalSupply !== 0n
+        //   ? Number(vaultData.totalAssets) / Number(vaultData.totalSupply)
+        //   : 0
+        //
+        // const interestRate = (currentSharePrice / initialSharePrice) - 1
+        // const historicalApy = Math.pow(
+        //   (1 + interestRate), daysSinceVaultLaunch / 365
+        // ) - 1
 
         let activeAPY = 0
         // (current 1sDAI yield + (current 1sDAI streamed per day from reward contract)*365/Current TVL*100))
@@ -245,7 +244,7 @@ export function useYieldBoost() {
           activeAPY = dailyReward * 365 / tvl
         }
 
-        return ((apy + activeAPY) * 100).toFixed(2)
+        return ((activeAPY) * 100).toFixed(2)
       }
     }
     return '0'
