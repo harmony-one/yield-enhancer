@@ -4,7 +4,8 @@ import { HelpCircle } from 'lucide-react';
 import {INITIAL_EXCHANGE_RATE} from "@/lib/constants";
 
 export function HowItWorksDialog(props: {
-  currentAPY: string
+  currentAPY: string;
+  exchangeRate: string;
 }) {
   return (
     <Dialog>
@@ -19,7 +20,7 @@ export function HowItWorksDialog(props: {
           <DialogTitle>How Yield Boost Works</DialogTitle>
           <div className="space-y-4 text-sm text-gray-400">
             <DialogDescription>
-              1sDAI is a yield-bearing stablecoin bridged from Sky Protocol (MakerDAO) - <a href="https://docs.spark.fi/user-guides/earning-savings/sdai-overview" target="_blank" rel="noopener noreferrer" className="text-[#7FF4E3] hover:underline">learn more</a>. When you deposit 1sDAI, you receive boostDAI at the current exchange rate.
+              1sDAI is a yield-bearing stablecoin bridged from Sky Protocol (MakerDAO) - <a href="https://docs.spark.fi/user-guides/earning-savings/sdai-overview" target="_blank" rel="noopener noreferrer" className="text-[#7FF4E3] hover:underline">learn more</a>. When you deposit 1sDAI, you receive boostDAI at the current exchange rate: 1 boostDAI = {props.exchangeRate} 1sDAI.
             </DialogDescription>
             <DialogDescription>
               Initially, 1 boostDAI = {INITIAL_EXCHANGE_RATE} 1sDAI. This ratio gradually increases over time, which is how yield is generated. Your boostDAI balance remains constant, but its value in 1sDAI grows.

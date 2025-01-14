@@ -48,6 +48,10 @@ export function YieldTabs({
     return 0
   }, [activeTab, previewAmount])
 
+  const isInputDisabled = useMemo(() => {
+    return !amount || amount === '0'
+  }, [amount])
+
   return (
     <Tabs
       defaultValue="deposit"
@@ -93,7 +97,7 @@ export function YieldTabs({
 
         <Button
           className="w-full py-6 text-lg bg-cyan-500 hover:bg-cyan-600 text-black"
-          disabled={inProgress}
+          disabled={inProgress || isInputDisabled}
           onClick={onBoost}
         >
           {inProgress && <Spinner />}
@@ -132,7 +136,7 @@ export function YieldTabs({
         <Button
           className="w-full py-6 text-lg bg-black/40 border border-[#7FF4E3]/20 text-[#7FF4E3] hover:bg-[#7FF4E3]/10"
           variant="outline"
-          disabled={inProgress}
+          disabled={inProgress || isInputDisabled}
           onClick={onWithdraw}
         >
           {inProgress && <Spinner />}

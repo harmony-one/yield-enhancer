@@ -77,7 +77,7 @@ export function YieldBoostCard({
         />
 
         <div className="flex justify-center">
-          <HowItWorksDialog currentAPY={currentAPY} />
+          <HowItWorksDialog currentAPY={currentAPY} exchangeRate={exchangeRate} />
         </div>
       </CardContent>
 
