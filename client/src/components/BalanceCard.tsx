@@ -2,8 +2,8 @@ import { PiggyBank, TrendingUp } from 'lucide-react';
 import { formatNumber } from "@/lib/utils";
 
 interface BalanceCardProps {
-  availableBalance: number;
-  boostedAmount: number | null;
+  availableBalance: string;
+  boostedAmount: string | null;
   currentAPY: string;
 }
 
@@ -18,7 +18,7 @@ export function BalanceCard({ availableBalance, boostedAmount, currentAPY }: Bal
         <p className="text-2xl font-bold">{formatNumber(availableBalance)} 1sDAI</p>
       </div>
 
-      {boostedAmount !== null && boostedAmount > 0 ? (
+      {boostedAmount !== null && +boostedAmount > 0 ? (
         <div className="rounded-xl bg-gradient-to-br from-[#7FF4E3]/10 to-[#7FF4E3]/5 border border-[#7FF4E3]/20 p-4 space-y-3">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-[#7FF4E3]" />

@@ -17,7 +17,7 @@ interface YieldTabsProps {
   onBoost: () => void;
   onWithdraw: () => void;
   previewAmount: number | null;
-  boostedAmount: number | null;
+  boostedAmount: string | null;
   activeTab: 'deposit' | 'withdraw';
   vaultData: VaultData;
   inProgress: boolean;
@@ -40,12 +40,12 @@ export function YieldTabs({
     if(previewAmount) {
       const amount = new Decimal(previewAmount)
       if(activeTab === "deposit") {
-        return amount.sub(amount.mul(DEPOSIT_FEE)).toNumber()
+        return amount.sub(amount.mul(DEPOSIT_FEE)).toString()
       } else if(activeTab === "withdraw") {
-        return amount.sub(amount.mul(WITHDRAWAL_FEE)).toNumber()
+        return amount.sub(amount.mul(WITHDRAWAL_FEE)).toString()
       }
     }
-    return 0
+    return '0'
   }, [activeTab, previewAmount])
 
   const isInputDisabled = useMemo(() => {

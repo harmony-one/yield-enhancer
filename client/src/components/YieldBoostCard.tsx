@@ -9,8 +9,8 @@ import Decimal from "decimal.js";
 import {VaultData} from "@/hooks/useYieldBoost.ts";
 
 interface YieldBoostCardProps {
-  availableBalance: number;
-  boostedAmount: number | null;
+  availableBalance: string;
+  boostedAmount: string | null;
   amount: string;
   onAmountChange: (value: string) => void;
   onMaxClick: () => void;
@@ -40,7 +40,7 @@ export function YieldBoostCard({
   vaultData
 }: YieldBoostCardProps) {
   const tvl = useMemo(() => {
-    return Number(formatUnits(vaultData.totalAssets, 18))
+    return String(formatUnits(vaultData.totalAssets, 18))
   }, [vaultData.totalAssets])
 
   const exchangeRate = useMemo(() => {
