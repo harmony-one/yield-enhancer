@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRightLeft } from 'lucide-react';
 import { formatNumber } from "@/lib/utils";
 import {DEPOSIT_FEE, WITHDRAWAL_FEE} from "@/lib/constants.ts";
-import {useMemo} from "react";
+import {useEffect, useMemo} from "react";
 import Decimal from "decimal.js";
 import {Spinner} from "@/components/ui/spinner.tsx";
 import {VaultData} from "@/hooks/useYieldBoost.ts";
@@ -62,9 +62,13 @@ export function YieldTabs({
     return false
   }, [activeTab, amount, availableBalance, boostedAmount])
 
+  useEffect(() => {
+    onAmountChange('')
+  }, [activeTab, onAmountChange]);
+
   const isInputDisabled = useMemo(() => {
     return !amount || amount === '0' || isInsufficientAmount
-  }, [amount])
+  }, [amount, isInsufficientAmount])
 
   return (
     <Tabs
