@@ -198,9 +198,6 @@ export function useYieldBoost() {
     }
   }, 3 * 1000)
 
-  const availableBalance = tokenBalance ? tokenBalance?.formatted : '0'
-  const boostedAmount = sharesBalance ? sharesBalance?.formatted : '0'
-
   /*
   Share price at t0 = totalAssets at T0 / totalSupply at T0
   Share price at t1 = totalAssets at T1 / totalSupply at T1
@@ -253,8 +250,8 @@ export function useYieldBoost() {
     isConnected,
     amount,
     setAmount,
-    availableBalance,
-    boostedAmount,
+    availableBalance: tokenBalance ? tokenBalance?.formatted : '0',
+    boostedAmount: sharesBalance ? sharesBalance?.formatted : '0',
     previewAmount,
     activeTab,
     setActiveTab,

@@ -1,7 +1,6 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { HelpCircle } from 'lucide-react';
-import {INITIAL_EXCHANGE_RATE} from "@/lib/constants";
 
 export function HowItWorksDialog(props: {
   currentAPY: string;

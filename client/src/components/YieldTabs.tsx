@@ -17,7 +17,8 @@ interface YieldTabsProps {
   onBoost: () => void;
   onWithdraw: () => void;
   previewAmount: number | null;
-  boostedAmount: string | null;
+  availableBalance: string;
+  boostedAmount: string;
   activeTab: 'deposit' | 'withdraw';
   vaultData: VaultData;
   inProgress: boolean;
@@ -31,6 +32,7 @@ export function YieldTabs({
   onBoost,
   onWithdraw,
   previewAmount,
+  availableBalance,
   boostedAmount,
   activeTab,
   inProgress,
@@ -48,8 +50,20 @@ export function YieldTabs({
     return '0'
   }, [activeTab, previewAmount])
 
+  const isInsufficientAmount = useMemo(() => {
+    if(amount && availableBalance && boostedAmount) {
+      const amountValue = new Decimal(amount)
+      if(activeTab === 'deposit') {
+        return new Decimal(availableBalance).lt(amountValue)
+      } else {
+        return new Decimal(boostedAmount).lt(amountValue)
+      }
+    }
+    return false
+  }, [activeTab, amount, availableBalance, boostedAmount])
+
   const isInputDisabled = useMemo(() => {
-    return !amount || amount === '0'
+    return !amount || amount === '0' || isInsufficientAmount
   }, [amount])
 
   return (
@@ -101,7 +115,7 @@ export function YieldTabs({
           onClick={onBoost}
         >
           {inProgress && <Spinner />}
-          Boost Yield
+          {isInsufficientAmount ? 'Insufficient 1sDAI' : 'Boost Yield'}
         </Button>
       </TabsContent>
 
@@ -140,7 +154,7 @@ export function YieldTabs({
           onClick={onWithdraw}
         >
           {inProgress && <Spinner />}
-          Withdraw
+          {isInsufficientAmount ? 'Insufficient boostDAI' : 'Withdraw'}
         </Button>
       </TabsContent>
     </Tabs>

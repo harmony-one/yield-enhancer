@@ -10,7 +10,7 @@ import {VaultData} from "@/hooks/useYieldBoost.ts";
 
 interface YieldBoostCardProps {
   availableBalance: string;
-  boostedAmount: string | null;
+  boostedAmount: string;
   amount: string;
   onAmountChange: (value: string) => void;
   onMaxClick: () => void;
@@ -69,6 +69,7 @@ export function YieldBoostCard({
           onBoost={onBoost}
           onWithdraw={onWithdraw}
           previewAmount={previewAmount}
+          availableBalance={availableBalance}
           boostedAmount={boostedAmount}
           onTabChange={onTabChange}
           activeTab={activeTab}
