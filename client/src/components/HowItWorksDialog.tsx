@@ -18,26 +18,31 @@ export function HowItWorksDialog(props: {
       <DialogContent className="sm:max-w-[425px] bg-[#1A1A1A] text-white border-cyan-500/20">
         <DialogHeader>
           <DialogTitle>How Yield Boost Works</DialogTitle>
-          <div className="space-y-4 text-sm text-gray-400">
-            <DialogDescription>
-              1sDAI is a yield-bearing stablecoin bridged from Sky Protocol (MakerDAO) - <a href="https://docs.spark.fi/user-guides/earning-savings/sdai-overview" target="_blank" rel="noopener noreferrer" className="text-[#7FF4E3] hover:underline">learn more</a>. When you deposit 1sDAI, you receive boostDAI at the current exchange rate: 1 boostDAI = {props.exchangeRate} 1sDAI.
+          <div className="mt-8 space-y-4 text-sm text-gray-400">
+            <DialogDescription className="mt-4">
+              <span className="text-cyan-400">1sDAI</span> is a yield-bearing stablecoin bridged from Sky Protocol (MakerDAO) - <a href="https://docs.spark.fi/user-guides/earning-savings/sdai-overview" target="_blank" rel="noopener noreferrer" className="text-[#7FF4E3] hover:underline">learn more</a>.
             </DialogDescription>
             <DialogDescription>
-              Initially, 1 boostDAI = {INITIAL_EXCHANGE_RATE} 1sDAI. This ratio gradually increases over time, which is how yield is generated. Your boostDAI balance remains constant, but its value in 1sDAI grows.
+              <span className="text-[#7FF4E3]">boostDAI</span> is a liquid token you receive when depositing 1sDAI into Yield Boost.
             </DialogDescription>
             <DialogDescription>
-              The yield comes from various sources outside of Harmony, contributed by the Treasury. This extra yield is pooled back to Yield Boost users on a 14-day rollout period, with varying yields each period.
+              Your boostDAI balance remains constant while its value in 1sDAI grows through yield from Treasury-contributed sources.
+            </DialogDescription>
+            <DialogDescription>
+              Current strategy leverages <a href="https://jup.ag/perps-earn" target="_blank" rel="noopener noreferrer" className="text-[#7FF4E3] hover:underline">JLP</a> liquidity token to earn additional yield, with more strategies in development.
             </DialogDescription>
           </div>
         </DialogHeader>
-        <div className="py-4">
-          <h4 className="text-sm font-medium mb-2">Key Benefits:</h4>
-          <ul className="list-disc list-inside text-sm space-y-1 text-gray-400">
-            <li>Current APY: {props.currentAPY}%</li>
-            <li>Yield earned through increasing exchange rate</li>
-            <li>Instant deposits and withdrawals</li>
-            <li>No minimum deposit required</li>
+        <div className="mt-4">
+          <h4 className="text-sm font-medium">Key Benefits:</h4>
+          <ul className="mt-1 text-sm text-gray-400">
+            <li>Current APY: <span className="text-[#7FF4E3]">{props.currentAPY}%</span></li>
+            <li>Instant deposit and withdrawals</li>
+            <li>boostDAI remains liquid</li>
           </ul>
+        </div>
+        <div className="text-xs text-gray-500 mt-4 mb-2">
+          *rollout periods and yield amounts may vary, past performance does not guarantee future returns
         </div>
       </DialogContent>
     </Dialog>
