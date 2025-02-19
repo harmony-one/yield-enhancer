@@ -1,21 +1,20 @@
 # Harmony Yield Boost
 
-A modern DeFi application that enables users to boost their yield on 1sDAI deposits through an innovative exchange rate mechanism.
+Built on the [ERC-4626](https://github.com/harmony-one/erc-4626) tokenized vault standard (used by [Yearn V3](https://docs.yearn.fi/partners/yvtokens-as-collateral#v3-vaults-are-erc4626-compatible) and other leading protocols), Yield Boost delivers additional yields for 1sDAI holders through automated compounding.
 
-<img width="597" alt="image" src="https://github.com/user-attachments/assets/e06569c2-7346-4543-8cf5-2cf04197ed34" />
+<table style="text-align: center; width: 100%;"> <tr> <td> Native sDAI Yield<br> <i><small>(MakerDAO's DSR via bridged 1sDAI)</small></i> </td> </tr> <tr> <td style="padding: 10px; font-size: 24px;"> + </td> </tr> <tr> <td> Treasury-Boosted Returns<br> <i><small>(Strategic allocations from treasury yield)</small></i> </td> </tr> </table>
 
 ## Overview
 
-Harmony Yield Boost is a decentralized finance application that allows users to enhance their yield returns on 1sDAI deposits. The protocol works by converting 1sDAI to boostDAI at a dynamic exchange rate that increases over time, effectively generating additional yield for users.
+<img width="597" alt="image" src="https://github.com/user-attachments/assets/e06569c2-7346-4543-8cf5-2cf04197ed34" />
 
 ### Key Features
 
-- 🚀 Enhanced APY through yield boosting mechanism
-- 💱 Dynamic exchange rate system
+- 🚀 Enhanced APY through yield boosting
+- ✅ Zero effort, auto-compounding
 - ⚡ Instant deposits and withdrawals
 - 🔒 No lock-up periods
 - 💰 No minimum deposit requirements
-- 📈 Transparent yield tracking
 
 ## Technical Details
 
@@ -23,7 +22,7 @@ Harmony Yield Boost is a decentralized finance application that allows users to 
 
 The core of the yield boost system is based on an exchange rate mechanism:
 
-- Initial rate: 1 boostDAI = 1.05 1sDAI
+- Initial rate: 1 boostDAI = 1 1sDAI
 - The exchange rate increases over time, generating yield
 - Users maintain a constant boostDAI balance while its 1sDAI value grows
 - Current APY: 11.8%
@@ -35,10 +34,10 @@ The core of the yield boost system is based on an exchange rate mechanism:
 
 ### Smart Contract Integration
 
-The protocol integrates with:
+The protocol implements the [ERC-4626](https://github.com/harmony-one/erc-4626) Tokenized Vault Standard and integrates with:
 - Sky Protocol (MakerDAO) for 1sDAI
 - Harmony blockchain for transactions
-- Treasury system for yield distribution
+- Treasury system for additional yield strategies
 
 ## Development
 
